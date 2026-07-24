@@ -1,58 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Upload, FileText, Download, FileArchive, Loader2 } from 'lucide-react';
-import { initAuth, googleSignIn, logout, getAccessToken } from './lib/auth';
-import { User } from 'firebase/auth';
 import { processImage } from './lib/imageProcessor';
-import { createGoogleDoc } from './lib/docs';
 import { jsPDF } from 'jspdf';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
 export default function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [needsAuth, setNeedsAuth] = useState(true);
-  
   const [files, setFiles] = useState<File[]>([]);
   const [processedImages, setProcessedImages] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [docLink, setDocLink] = useState<string | null>(null);
 
-  useEffect(() => {
-    const unsubscribe = initAuth(
-      (u, t) => {
-        setUser(u);
-        setToken(t);
-        setNeedsAuth(false);
-      },
-      () => {
-        setUser(null);
-        setToken(null);
-        setNeedsAuth(true);
-      }
-    );
-    return () => unsubscribe();
-  }, []);
 
-  const handleLogin = async () => {
-    try {
-      const result = await googleSignIn();
-      if (result) {
-        setUser(result.user);
-        setToken(result.accessToken);
-        setNeedsAuth(false);
-      }
-    } catch (err) {
-      console.error('Login failed:', err);
-    }
-  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFiles(Array.from(e.target.files));
       setProcessedImages([]);
-      setDocLink(null);
     }
   };
 
@@ -109,10 +73,9 @@ export default function App() {
     saveAs(content, 'restored_notes_pngs.zip');
   };
 
-  const exportToGoogleDocs = async () => {
-    if (processedImages.length === 0 || !token) return;
+  const exportText = async () => {
+    if (processedImages.length === 0) return;
     setIsExporting(true);
-    setDocLink(null);
     try {
       let fullText = "";
       for (const imgBase64 of processedImages) {
@@ -127,41 +90,17 @@ export default function App() {
          fullText += data.text + "\n\n---\n\n";
       }
       
-      const link = await createGoogleDoc('Restored Notes OCR', fullText, token);
-      setDocLink(link);
+      const blob = new Blob([fullText], { type: 'text/markdown;charset=utf-8' });
+      saveAs(blob, 'extracted_text.md');
     } catch (err) {
       console.error('Export failed:', err);
-      alert('Failed to export to Google Docs.');
+      alert('Failed to export text.');
     } finally {
       setIsExporting(false);
     }
   };
 
-  if (needsAuth) {
-    return (
-      <div className="flex flex-col h-screen w-full bg-[#E4E3E0] text-[#141414] font-['Helvetica_Neue',_Arial,_sans-serif] overflow-hidden items-center justify-center">
-        <div className="max-w-md w-full space-y-8 p-8 border border-[#141414] bg-[#DCDAD5] shadow-lg text-center">
-          <div>
-            <div className="mx-auto w-12 h-12 bg-[#141414] flex items-center justify-center text-[#E4E3E0] font-bold text-2xl mb-4">R</div>
-            <h2 className="mt-6 text-2xl font-bold uppercase tracking-widest leading-none">Restoration Engine</h2>
-            <p className="mt-2 text-[10px] font-mono opacity-60 uppercase">Sign in to sync with Google Docs</p>
-          </div>
-          <button
-            onClick={handleLogin}
-            className="w-full flex items-center justify-center px-4 py-3 bg-[#141414] text-[#E4E3E0] text-[11px] font-bold uppercase tracking-wider hover:bg-black focus:outline-none"
-          >
-            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-            </svg>
-            Sign in with Google
-          </button>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="flex flex-col h-screen w-full bg-[#E4E3E0] text-[#141414] font-['Helvetica_Neue',_Arial,_sans-serif] overflow-hidden">
@@ -176,12 +115,9 @@ export default function App() {
         </div>
         <div className="flex items-center gap-6">
           <div className="flex flex-col items-end">
-             <span className="text-[10px] font-mono opacity-50 uppercase">Session Account</span>
-             <span className="text-xs font-mono">{user?.email || 'GUEST'}</span>
+             <span className="text-[10px] font-mono opacity-50 uppercase">Session Status</span>
+             <span className="text-xs font-mono">LOCAL MODE</span>
           </div>
-          <button onClick={logout} className="px-4 py-2 bg-[#141414] text-[#E4E3E0] text-[11px] font-bold uppercase tracking-wider hover:bg-black">
-            Sign Out
-          </button>
         </div>
       </header>
 
@@ -243,22 +179,14 @@ export default function App() {
                    <FileArchive className="w-3 h-3" /> Export PNG Archive
                  </button>
                  <button 
-                   onClick={exportToGoogleDocs}
+                   onClick={exportText}
                    disabled={isExporting || processedImages.length === 0}
                    className="w-full flex items-center justify-center gap-2 p-2 border border-[#141414] bg-[#F0EFEC] text-[#141414] text-[10px] font-bold uppercase tracking-wider disabled:opacity-30 hover:bg-[#E4E3E0]"
                  >
-                   {isExporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <svg className="w-3 h-3" viewBox="0 0 24 24"><path fill="#4285F4" d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path fill="#E8EAF6" d="M14 2v6h6"/><path fill="#1565C0" d="M8 13h8v2H8zm0-4h5v2H8zm0 8h8v2H8z"/></svg>}
-                   {isExporting ? 'Extracting...' : 'Sync to Docs'}
+                   {isExporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />}
+                   {isExporting ? 'Extracting...' : 'Export Text (MD)'}
                  </button>
                </div>
-               
-               {docLink && (
-                  <div className="mt-3 p-2 border border-[#141414] bg-[#141414] text-center">
-                    <a href={docLink} target="_blank" rel="noreferrer" className="text-[9px] font-mono text-[#00FF00] hover:underline uppercase tracking-widest">
-                      &gt; Open Google Doc
-                    </a>
-                  </div>
-                )}
             </div>
           </div>
         </aside>
