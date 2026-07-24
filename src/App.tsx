@@ -10,6 +10,7 @@ export default function App() {
   const [processedImages, setProcessedImages] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [apiKey, setApiKey] = useState('');
 
 
 
@@ -75,26 +76,44 @@ export default function App() {
 
   const exportText = async () => {
     if (processedImages.length === 0) return;
+    if (!apiKey.trim()) {
+      alert("Please enter a Gemini API Key first.");
+      return;
+    }
     setIsExporting(true);
     try {
       let fullText = "";
       for (const imgBase64 of processedImages) {
-         const res = await fetch('/api/extract-text', {
+         const base64Data = imgBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
+         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey.trim()}`, {
            method: 'POST',
            headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ imageBase64: imgBase64 })
+           body: JSON.stringify({
+             contents: [
+               {
+                 parts: [
+                   { inlineData: { mimeType: "image/png", data: base64Data } },
+                   { text: "Extract all the text and structure from this notes page. Present it as clean Markdown. Preserve all headers, lists, diagrams (described in text), and content exactly as written. Do not summarize or paraphrase." }
+                 ]
+               }
+             ]
+           })
          });
          
-         if (!res.ok) throw new Error('Failed to extract text via Gemini');
+         if (!res.ok) {
+           const errData = await res.json();
+           throw new Error(errData.error?.message || 'Failed to extract text via Gemini');
+         }
          const data = await res.json();
-         fullText += data.text + "\n\n---\n\n";
+         const extractedText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+         fullText += extractedText + "\n\n---\n\n";
       }
       
       const blob = new Blob([fullText], { type: 'text/markdown;charset=utf-8' });
       saveAs(blob, 'extracted_text.md');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Export failed:', err);
-      alert('Failed to export text.');
+      alert('Failed to export text. Error: ' + err.message);
     } finally {
       setIsExporting(false);
     }
@@ -130,6 +149,19 @@ export default function App() {
           </div>
           
           <div className="p-4 flex flex-col gap-6">
+            {/* Configuration Section */}
+            <div className="flex flex-col">
+               <span className="text-[10px] font-mono opacity-60 uppercase mb-2">0. Configuration</span>
+               <input
+                 type="password"
+                 placeholder="Gemini API Key"
+                 value={apiKey}
+                 onChange={(e) => setApiKey(e.target.value)}
+                 className="w-full bg-[#F0EFEC] border border-[#141414] p-2 text-[11px] font-mono focus:outline-none focus:bg-white"
+               />
+               <span className="text-[9px] font-mono opacity-50 mt-1 uppercase">Required for text extraction</span>
+            </div>
+
             {/* Upload Section */}
             <div className="flex flex-col">
                <span className="text-[10px] font-mono opacity-60 uppercase mb-2">1. Source Files</span>
