@@ -128,8 +128,8 @@ export default function App() {
         <div className="flex items-center gap-2 md:gap-4">
           <div className="w-6 h-6 md:w-8 md:h-8 bg-[#141414] flex items-center justify-center text-[#E4E3E0] font-bold text-sm md:text-lg shrink-0">R</div>
           <div className="flex flex-col">
-            <h1 className="text-sm font-bold uppercase tracking-widest leading-none">Restoration Engine v4.2</h1>
-            <p className="text-[9px] md:text-[10px] font-mono opacity-60 uppercase">High-Fidelity Document Reconstruction / OCR Engine</p>
+            <h1 className="text-sm font-bold uppercase tracking-widest leading-none">Document Restoration Engine 🔧📄</h1>
+            <p className="text-[9px] md:text-[10px] font-mono opacity-60 uppercase">Vision Transformer + Gemini API OCR</p>
           </div>
         </div>
         <div className="flex items-center gap-6 hidden md:flex">
@@ -251,15 +251,20 @@ export default function App() {
                  </div>
                ))
             ) : files.length > 0 ? (
-               <div className="flex flex-col items-center justify-center h-full opacity-40">
+               <div className="flex flex-col items-center justify-center h-full opacity-60 p-6 text-center max-w-md mx-auto">
                   <div className="w-12 h-12 border-2 border-[#141414] rounded-full flex items-center justify-center mb-4">
                      <FileText className="w-6 h-6" />
                   </div>
-                  <span className="text-[11px] font-bold uppercase tracking-widest">Awaiting Execution</span>
+                  <span className="text-[11px] font-bold uppercase tracking-widest mb-2">Ready for Restoration</span>
+                  <p className="text-[10px] font-mono">Click 'Execute Restoration' to rebuild high-fidelity output and turn these broken scans into clean, readable documents automatically.</p>
                </div>
             ) : (
-               <div className="flex flex-col items-center justify-center h-full opacity-40">
-                  <span className="text-[11px] font-bold uppercase tracking-widest">No Input Source</span>
+               <div className="flex flex-col items-center justify-center h-full opacity-60 p-6 text-center max-w-md mx-auto">
+                  <div className="w-12 h-12 border-2 border-[#141414] rounded-full flex items-center justify-center mb-4">
+                     <Upload className="w-6 h-6" />
+                  </div>
+                  <span className="text-[11px] font-bold uppercase tracking-widest mb-2">Upload a photo to begin</span>
+                  <p className="text-[10px] font-mono mt-2">Document Restoration Engine uses AI to reconstruct damaged or unclear document images and extract text via OCR.</p>
                </div>
             )}
           </div>
@@ -279,7 +284,7 @@ export default function App() {
           </div>
           <div className="flex gap-2 text-[#0066CC]">
             <span className="opacity-100 uppercase hidden sm:inline">Engine:</span>
-            <span>NEURAL_VISION_R7</span>
+            <span>ViT + GEMINI_2.5</span>
           </div>
         </div>
         <div className="flex gap-2 md:gap-4 items-center w-full md:w-auto justify-between md:justify-end">

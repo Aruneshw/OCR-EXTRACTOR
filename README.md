@@ -2,7 +2,7 @@
 
 **Made by Aruneshwaran K**
 
-Restoration Engine v4.2 - High-Fidelity Document Reconstruction & OCR Engine. This application allows users to upload images, process them, and extract text using AI to create structured Google Docs.
+Document Restoration Engine 🔧📄 — it uses AI (Vision Transformer + Gemini API) to reconstruct damaged or unclear document images and extract text via OCR. Just upload a photo, and it rebuilds high-fidelity output, then exports as PDF, PNG, or text. Basically turning broken scans into clean, readable documents automatically.
 
 ## Run Locally
 
