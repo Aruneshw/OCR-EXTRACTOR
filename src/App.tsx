@@ -124,15 +124,15 @@ export default function App() {
   return (
     <div className="flex flex-col h-screen w-full bg-[#E4E3E0] text-[#141414] font-['Helvetica_Neue',_Arial,_sans-serif] overflow-hidden">
       {/* Header: Application Identity */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-[#141414] bg-[#F0EFEC]">
-        <div className="flex items-center gap-4">
-          <div className="w-8 h-8 bg-[#141414] flex items-center justify-center text-[#E4E3E0] font-bold text-lg">R</div>
+      <header className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-[#141414] bg-[#F0EFEC]">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="w-6 h-6 md:w-8 md:h-8 bg-[#141414] flex items-center justify-center text-[#E4E3E0] font-bold text-sm md:text-lg shrink-0">R</div>
           <div className="flex flex-col">
             <h1 className="text-sm font-bold uppercase tracking-widest leading-none">Restoration Engine v4.2</h1>
-            <p className="text-[10px] font-mono opacity-60 uppercase">High-Fidelity Document Reconstruction / OCR Engine</p>
+            <p className="text-[9px] md:text-[10px] font-mono opacity-60 uppercase">High-Fidelity Document Reconstruction / OCR Engine</p>
           </div>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 hidden md:flex">
           <div className="flex flex-col items-end">
              <span className="text-[10px] font-mono opacity-50 uppercase">Session Status</span>
              <span className="text-xs font-mono">LOCAL MODE</span>
@@ -141,9 +141,9 @@ export default function App() {
       </header>
 
       {/* Main Content Area: Split Viewport */}
-      <main className="flex-1 flex overflow-hidden">
+      <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Sidebar: Control Panel */}
-        <aside className="w-72 border-r border-[#141414] flex flex-col bg-[#DCDAD5] overflow-y-auto">
+        <aside className="w-full md:w-72 border-b md:border-b-0 md:border-r border-[#141414] flex flex-col bg-[#DCDAD5] overflow-y-auto md:shrink-0 max-h-[50vh] md:max-h-full">
           <div className="p-3 border-b border-[#141414] bg-[#CFCFCA]">
             <span className="text-[10px] font-bold uppercase font-serif italic">Input & Processing</span>
           </div>
@@ -224,23 +224,23 @@ export default function App() {
         </aside>
 
         {/* Restoration Workspace */}
-        <div className="flex-1 flex flex-col p-6 overflow-hidden">
+        <div className="flex-1 flex flex-col p-4 md:p-6 overflow-hidden">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[11px] font-bold uppercase tracking-widest border-l-2 border-[#141414] pl-3">
+            <h2 className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest border-l-2 border-[#141414] pl-2 md:pl-3">
                Output Workspace {processedImages.length > 0 && `(${processedImages.length} PAGES)`}
             </h2>
-            <div className="flex gap-4">
-              <span className="text-[10px] font-mono bg-[#F0EFEC] px-2 border border-[#141414]">300 DPI</span>
-              <span className="text-[10px] font-mono bg-[#F0EFEC] px-2 border border-[#141414]">A4 PORTRAIT</span>
+            <div className="flex gap-2 md:gap-4">
+              <span className="text-[9px] md:text-[10px] font-mono bg-[#F0EFEC] px-2 border border-[#141414] hidden sm:inline-block">300 DPI</span>
+              <span className="text-[9px] md:text-[10px] font-mono bg-[#F0EFEC] px-2 border border-[#141414]">A4 PORTRAIT</span>
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto border border-[#141414] bg-[#CFCFCA] p-6 flex flex-wrap gap-6 items-start justify-center">
+          <div className="flex-1 overflow-auto border border-[#141414] bg-[#CFCFCA] p-4 md:p-6 flex flex-wrap gap-4 md:gap-6 items-start justify-center">
             {processedImages.length > 0 ? (
                processedImages.map((img, i) => (
                  <div key={i} className="flex flex-col">
                    <div className="text-[9px] font-mono italic mb-1 opacity-60 uppercase tracking-tighter">PAGE_{String(i+1).padStart(2, '0')}</div>
-                   <div className="w-64 h-[360px] bg-white border border-[#141414] shadow-xl relative overflow-hidden flex items-center justify-center p-2">
+                   <div className="w-full max-w-[256px] h-auto min-h-[300px] aspect-[1/1.414] bg-white border border-[#141414] shadow-xl relative overflow-hidden flex items-center justify-center p-2 mx-auto">
                       <img src={img} alt={`Page ${i+1}`} className="max-w-full max-h-full object-contain" />
                       {/* Scanner Artifact Removal Indicator - purely aesthetic for the theme */}
                       <div className="absolute bottom-2 right-2 flex gap-1 opacity-50">
@@ -267,22 +267,22 @@ export default function App() {
       </main>
 
       {/* Footer: System Telemetry */}
-      <footer className="h-8 border-t border-[#141414] bg-[#F0EFEC] px-4 flex items-center justify-between text-[10px] font-mono">
-        <div className="flex gap-6 items-center">
+      <footer className="border-t border-[#141414] bg-[#F0EFEC] px-4 py-2 md:h-8 flex flex-wrap items-center justify-between text-[10px] font-mono gap-y-2">
+        <div className="flex gap-4 md:gap-6 items-center w-full md:w-auto justify-between md:justify-start">
           <div className="flex gap-2">
-            <span className="opacity-40 uppercase">Queue:</span>
+            <span className="opacity-40 uppercase hidden sm:inline">Queue:</span>
             <span>{files.length}</span>
           </div>
           <div className="flex gap-2">
-            <span className="opacity-40 uppercase">Processed:</span>
+            <span className="opacity-40 uppercase hidden sm:inline">Processed:</span>
             <span>{processedImages.length}</span>
           </div>
           <div className="flex gap-2 text-[#0066CC]">
-            <span className="opacity-100 uppercase">Engine:</span>
+            <span className="opacity-100 uppercase hidden sm:inline">Engine:</span>
             <span>NEURAL_VISION_R7</span>
           </div>
         </div>
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-2 md:gap-4 items-center w-full md:w-auto justify-between md:justify-end">
           <span className="opacity-60 uppercase font-bold tracking-widest text-[9px] mr-4">Made by Aruneshwaran K</span>
           <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-[#00FF00] rounded-full"></span> SYSTEM_STABLE</span>
         </div>
