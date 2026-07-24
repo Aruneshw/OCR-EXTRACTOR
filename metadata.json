@@ -1,0 +1,6 @@
+{
+  "name": "Doc Restore Pro",
+  "description": "Professional document restoration, OCR, and print-layout PDF generator with Google Docs export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
